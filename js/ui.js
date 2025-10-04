@@ -13,6 +13,7 @@ class UIController {
         this.currentPlaylist = null;
         this.virtualScrollers = new Map();
         this.searchTimeout = null;
+        this.userProfile = null;
         
         this.elements = {};
         this.init();
@@ -102,6 +103,46 @@ class UIController {
         this.elements.playlistTrackCount = document.getElementById('playlistTrackCount');
         this.elements.playlistDuration = document.getElementById('playlistDuration');
         this.elements.playPlaylist = document.getElementById('playPlaylist');
+
+        // Profile Modal
+        this.elements.userProfileBtn = document.getElementById('userProfile');
+        this.elements.profileModal = document.getElementById('profileModal');
+        this.elements.profileModalOverlay = document.getElementById('profileModalOverlay');
+        this.elements.closeProfileModal = document.getElementById('closeProfileModal');
+        this.elements.profileDisplayName = document.getElementById('profileDisplayName');
+        this.elements.profileUsername = document.getElementById('profileUsername');
+        this.elements.profileMemberSince = document.getElementById('profileMemberSince');
+        this.elements.profileFollowers = document.getElementById('profileFollowers');
+        this.elements.profileFollowing = document.getElementById('profileFollowing');
+        this.elements.profilePlaylists = document.getElementById('profilePlaylists');
+        
+        // Profile Tabs
+        this.elements.profileTabBtns = document.querySelectorAll('.profile-tab-btn');
+        this.elements.profileInfoTab = document.getElementById('profileInfoTab');
+        this.elements.profileStatsTab = document.getElementById('profileStatsTab');
+        this.elements.profileSettingsTab = document.getElementById('profileSettingsTab');
+        
+        // Profile Info Form
+        this.elements.editDisplayName = document.getElementById('editDisplayName');
+        this.elements.editEmail = document.getElementById('editEmail');
+        this.elements.editBio = document.getElementById('editBio');
+        this.elements.saveProfileBtn = document.getElementById('saveProfileBtn');
+        
+        // Profile Stats
+        this.elements.statsListeningTime = document.getElementById('statsListeningTime');
+        this.elements.statsTotalTracks = document.getElementById('statsTotalTracks');
+        this.elements.statsLikedSongs = document.getElementById('statsLikedSongs');
+        this.elements.statsPlaylistsCreated = document.getElementById('statsPlaylistsCreated');
+        this.elements.statsTopGenre = document.getElementById('statsTopGenre');
+        this.elements.statsTopArtist = document.getElementById('statsTopArtist');
+        
+        // Profile Settings
+        this.elements.settingAutoplay = document.getElementById('settingAutoplay');
+        this.elements.settingCrossfade = document.getElementById('settingCrossfade');
+        this.elements.settingNormalizeVolume = document.getElementById('settingNormalizeVolume');
+        this.elements.settingExplicitContent = document.getElementById('settingExplicitContent');
+        this.elements.settingLanguage = document.getElementById('settingLanguage');
+        this.elements.saveSettingsBtn = document.getElementById('saveSettingsBtn');
     }
 
     setupEventListeners() {
@@ -242,6 +283,38 @@ class UIController {
                 const playlist = await api.getPlaylist(this.currentPlaylist.id);
                 player.setQueue(playlist.tracks, 0);
             }
+        });
+
+        // Profile button
+        this.elements.userProfileBtn?.addEventListener('click', () => {
+            this.showProfileModal();
+        });
+
+        // Close profile modal
+        this.elements.closeProfileModal?.addEventListener('click', () => {
+            this.hideProfileModal();
+        });
+
+        this.elements.profileModalOverlay?.addEventListener('click', () => {
+            this.hideProfileModal();
+        });
+
+        // Profile tabs
+        this.elements.profileTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.profileTab;
+                this.switchProfileTab(tab);
+            });
+        });
+
+        // Save profile
+        this.elements.saveProfileBtn?.addEventListener('click', () => {
+            this.saveProfile();
+        });
+
+        // Save settings
+        this.elements.saveSettingsBtn?.addEventListener('click', () => {
+            this.saveSettings();
         });
     }
 
@@ -696,6 +769,138 @@ class UIController {
             icon = 'fa-volume-down';
         }
         this.elements.player.volumeBtn.innerHTML = `<i class="fas ${icon}"></i>`;
+    }
+
+    // Profile Modal Methods
+    async showProfileModal() {
+        try {
+            // Load profile data
+            this.userProfile = await api.getUserProfile();
+            this.populateProfile();
+            
+            // Show modal
+            this.elements.profileModal.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            alert('Failed to load profile data');
+        }
+    }
+
+    hideProfileModal() {
+        this.elements.profileModal.classList.add('hidden');
+    }
+
+    populateProfile() {
+        if (!this.userProfile) return;
+
+        // Header info
+        this.elements.profileDisplayName.textContent = this.userProfile.displayName;
+        this.elements.profileUsername.textContent = `@${this.userProfile.username}`;
+        
+        const memberDate = new Date(this.userProfile.memberSince);
+        this.elements.profileMemberSince.textContent = 
+            `Member since ${memberDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+        
+        // Stats header
+        this.elements.profileFollowers.textContent = this.userProfile.followersCount;
+        this.elements.profileFollowing.textContent = this.userProfile.followingCount;
+        this.elements.profilePlaylists.textContent = this.userProfile.statistics.playlistsCreated;
+
+        // Profile info form
+        this.elements.editDisplayName.value = this.userProfile.displayName;
+        this.elements.editEmail.value = this.userProfile.email;
+        this.elements.editBio.value = this.userProfile.bio;
+
+        // Statistics
+        const listeningHours = Math.floor(this.userProfile.statistics.totalListeningTime / 60);
+        this.elements.statsListeningTime.textContent = `${listeningHours.toLocaleString()} hours`;
+        this.elements.statsTotalTracks.textContent = this.userProfile.statistics.totalTracks.toLocaleString();
+        this.elements.statsLikedSongs.textContent = this.userProfile.statistics.likedSongs.toLocaleString();
+        this.elements.statsPlaylistsCreated.textContent = this.userProfile.statistics.playlistsCreated;
+        this.elements.statsTopGenre.textContent = this.userProfile.statistics.topGenre;
+        this.elements.statsTopArtist.textContent = this.userProfile.statistics.topArtist;
+
+        // Settings
+        this.elements.settingAutoplay.checked = this.userProfile.preferences.autoplay;
+        this.elements.settingCrossfade.checked = this.userProfile.preferences.crossfade;
+        this.elements.settingNormalizeVolume.checked = this.userProfile.preferences.normalizeVolume;
+        this.elements.settingExplicitContent.checked = this.userProfile.preferences.showExplicitContent;
+        this.elements.settingLanguage.value = this.userProfile.preferences.language;
+    }
+
+    switchProfileTab(tab) {
+        // Update tab buttons
+        this.elements.profileTabBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.profileTab === tab);
+        });
+
+        // Update tab content
+        this.elements.profileInfoTab.classList.toggle('hidden', tab !== 'info');
+        this.elements.profileStatsTab.classList.toggle('hidden', tab !== 'stats');
+        this.elements.profileSettingsTab.classList.toggle('hidden', tab !== 'settings');
+    }
+
+    async saveProfile() {
+        try {
+            const updates = {
+                displayName: this.elements.editDisplayName.value,
+                email: this.elements.editEmail.value,
+                bio: this.elements.editBio.value
+            };
+
+            const btn = this.elements.saveProfileBtn;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            this.userProfile = await api.updateUserProfile(updates);
+            
+            // Update header display
+            this.elements.profileDisplayName.textContent = this.userProfile.displayName;
+            this.elements.profileUsername.textContent = `@${this.userProfile.username}`;
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            }, 2000);
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            alert('Failed to save profile. Please try again.');
+            this.elements.saveProfileBtn.disabled = false;
+            this.elements.saveProfileBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        }
+    }
+
+    async saveSettings() {
+        try {
+            const preferences = {
+                autoplay: this.elements.settingAutoplay.checked,
+                crossfade: this.elements.settingCrossfade.checked,
+                normalizeVolume: this.elements.settingNormalizeVolume.checked,
+                showExplicitContent: this.elements.settingExplicitContent.checked,
+                language: this.elements.settingLanguage.value
+            };
+
+            const btn = this.elements.saveSettingsBtn;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            await api.updateUserPreferences(preferences);
+            this.userProfile.preferences = preferences;
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
+            }, 2000);
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            alert('Failed to save settings. Please try again.');
+            this.elements.saveSettingsBtn.disabled = false;
+            this.elements.saveSettingsBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
+        }
     }
 }
 

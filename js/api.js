@@ -29,6 +29,7 @@ class MockDataGenerator {
         this.playlists = this.generatePlaylists();
         this.artists = this.generateArtists();
         this.albums = this.generateAlbums();
+        this.userProfile = this.generateUserProfile();
     }
 
     generateTracks(count = 100) {
@@ -111,6 +112,36 @@ class MockDataGenerator {
         return [...this.tracks]
             .sort(() => Math.random() - 0.5)
             .slice(0, 10);
+    }
+
+    generateUserProfile() {
+        return {
+            id: 'user-1',
+            username: 'MusicLover',
+            displayName: 'Music Lover',
+            email: 'user@jukebx.local',
+            bio: 'Passionate about discovering new music and creating the perfect playlists.',
+            avatarUrl: null,
+            memberSince: '2023-01-15',
+            followersCount: 42,
+            followingCount: 78,
+            preferences: {
+                theme: 'dark',
+                autoplay: true,
+                crossfade: false,
+                normalizeVolume: true,
+                showExplicitContent: true,
+                language: 'en'
+            },
+            statistics: {
+                totalListeningTime: 125430, // minutes
+                totalTracks: 1245,
+                topGenre: 'Electronic',
+                topArtist: 'Artist 1',
+                playlistsCreated: 15,
+                likedSongs: 347
+            }
+        };
     }
 }
 
@@ -372,6 +403,50 @@ class APIService {
         }
         
         return this.request('/statistics');
+    }
+
+    /**
+     * Get user profile
+     */
+    async getUserProfile() {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            return mockData.userProfile;
+        }
+        
+        return this.request('/user/profile');
+    }
+
+    /**
+     * Update user profile
+     */
+    async updateUserProfile(updates) {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            Object.assign(mockData.userProfile, updates);
+            return mockData.userProfile;
+        }
+        
+        return this.request('/user/profile', { 
+            method: 'PUT', 
+            body: updates 
+        });
+    }
+
+    /**
+     * Update user preferences
+     */
+    async updateUserPreferences(preferences) {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            Object.assign(mockData.userProfile.preferences, preferences);
+            return mockData.userProfile.preferences;
+        }
+        
+        return this.request('/user/preferences', { 
+            method: 'PUT', 
+            body: preferences 
+        });
     }
 }
 
