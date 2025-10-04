@@ -1401,3 +1401,103 @@ input:checked + .slider:before {
         gap: var(--spacing-md);
     }
 }
+
+/* Notification Toast */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--background-elevated);
+    color: var(--text-primary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    min-width: 250px;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+    z-index: 10000;
+    border-left: 4px solid var(--primary);
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification i {
+    font-size: 20px;
+}
+
+.notification-success {
+    border-left-color: #1db954;
+}
+
+.notification-success i {
+    color: #1db954;
+}
+
+.notification-error {
+    border-left-color: #e22134;
+}
+
+.notification-error i {
+    color: #e22134;
+}
+
+.notification-warning {
+    border-left-color: #ffa500;
+}
+
+.notification-warning i {
+    color: #ffa500;
+}
+
+.notification-info {
+    border-left-color: #3b82f6;
+}
+
+.notification-info i {
+    color: #3b82f6;
+}
+
+/* Download/Delete Button Styling */
+.playlist-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.track-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.track-row:hover .track-actions {
+    opacity: 1;
+}
+
+.btn-icon[title] {
+    position: relative;
+}
+
+.btn-icon:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Mobile notification adjustments */
+@media (max-width: 768px) {
+    .notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+    }
+}

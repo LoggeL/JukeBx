@@ -448,6 +448,120 @@ class APIService {
             body: preferences 
         });
     }
+
+    /**
+     * Download a single track
+     */
+    async downloadTrack(trackId) {
+        const track = await this.getTrack(trackId);
+        if (!track) {
+            throw new Error('Track not found');
+        }
+
+        if (this.config.useMock) {
+            // Mock download - create a sample file
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const content = `Mock audio file for: ${track.title} by ${track.artist}`;
+            const blob = new Blob([content], { type: 'audio/mpeg' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${track.artist} - ${track.title}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            return { success: true, trackId };
+        }
+
+        // Real API implementation
+        const response = await fetch(track.audioUrl);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${track.artist} - ${track.title}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return { success: true, trackId };
+    }
+
+    /**
+     * Download entire playlist as a zip file
+     */
+    async downloadPlaylist(playlistId) {
+        const playlist = await this.getPlaylist(playlistId);
+        if (!playlist) {
+            throw new Error('Playlist not found');
+        }
+
+        if (this.config.useMock) {
+            // Mock download - simulate downloading all tracks
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const content = `Mock playlist archive for: ${playlist.name}\n\nTracks:\n${playlist.tracks.map(t => `- ${t.artist} - ${t.title}`).join('\n')}`;
+            const blob = new Blob([content], { type: 'application/zip' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${playlist.name}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            return { success: true, playlistId, tracksCount: playlist.tracks.length };
+        }
+
+        // Real API implementation - request zip from backend
+        return this.request(`${this.config.endpoints.playlists}/${playlistId}/download`, {
+            method: 'POST'
+        });
+    }
+
+    /**
+     * Delete/Shred a playlist
+     */
+    async deletePlaylist(playlistId) {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const index = mockData.playlists.findIndex(p => p.id === playlistId);
+            if (index === -1) {
+                throw new Error('Playlist not found');
+            }
+            mockData.playlists.splice(index, 1);
+            return { success: true, playlistId };
+        }
+
+        return this.request(`${this.config.endpoints.playlists}/${playlistId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    /**
+     * Create a new playlist
+     */
+    async createPlaylist(name, description = '') {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const newPlaylist = {
+                id: `playlist-${Date.now()}`,
+                name,
+                description,
+                trackCount: 0,
+                coverUrl: null,
+                createdAt: new Date().toISOString(),
+                tracks: []
+            };
+            mockData.playlists.push(newPlaylist);
+            return newPlaylist;
+        }
+
+        return this.request(this.config.endpoints.playlists, {
+            method: 'POST',
+            body: { name, description }
+        });
+    }
 }
 
 // Export singleton instance
