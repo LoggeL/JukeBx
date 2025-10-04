@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JukeBx - A sleek, self-hosted music streaming alternative powered by LMF">
+    <meta name="theme-color" content="#1db954">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JukeBx">
+    <title>JukeBx - Your Music, Your Way</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-record-vinyl"></i>
+                <span>JukeBx</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="#home" class="nav-item active" data-view="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="#search" class="nav-item" data-view="search">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </a>
+            <a href="#library" class="nav-item" data-view="library">
+                <i class="fas fa-book"></i>
+                <span>Your Library</span>
+            </a>
+            <a href="#admin" class="nav-item" data-view="admin">
+                <i class="fas fa-cog"></i>
+                <span>Admin Panel</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-playlists">
+            <div class="playlists-header">
+                <h3>Playlists</h3>
+                <button class="btn-icon" id="createPlaylist">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="playlists-list" id="playlistsList">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <small>Powered by <a href="https://lmf.logge.top" target="_blank">LMF</a></small>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+        <header class="top-bar">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch" placeholder="Search for songs, artists, or playlists...">
+            </div>
+            <div class="user-menu">
+                <button class="btn-icon" id="userProfile">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-wrapper" id="contentWrapper">
+            <!-- Home View -->
+            <div class="view" id="homeView">
+                <h1>Welcome to JukeBx</h1>
+                <p class="subtitle">Your sleek, self-hosted music streaming experience</p>
+                
+                <section class="content-section">
+                    <h2>Recently Played</h2>
+                    <div class="horizontal-scroll" id="recentlyPlayed">
+                        <!-- Dynamically populated -->
+                    </div>
+                </section>
+                
+                <section class="content-section">
+                    <h2>Popular Playlists</h2>
+                    <div class="horizontal-scroll" id="popularPlaylists">
+                        <!-- Dynamically populated -->
+                    </div>
+                </section>
+                
+                <section class="content-section">
+                    <h2>Recommended for You</h2>
+                    <div class="horizontal-scroll" id="recommendedTracks">
+                        <!-- Dynamically populated -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Search View -->
+            <div class="view hidden" id="searchView">
+                <h1>Search</h1>
+                <div class="search-results" id="searchResults">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Search for your favorite music</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Library View -->
+            <div class="view hidden" id="libraryView">
+                <h1>Your Library</h1>
+                <div class="library-tabs">
+                    <button class="tab-btn active" data-tab="playlists">Playlists</button>
+                    <button class="tab-btn" data-tab="songs">Songs</button>
+                    <button class="tab-btn" data-tab="artists">Artists</button>
+                    <button class="tab-btn" data-tab="albums">Albums</button>
+                </div>
+                <div class="library-content" id="libraryContent">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Admin Panel View -->
+            <div class="view hidden" id="adminView">
+                <h1>Admin Panel</h1>
+                <p class="subtitle">Manage your music collection</p>
+                
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-music"></i>
+                        <div class="stat-info">
+                            <h3 id="totalTracks">0</h3>
+                            <p>Total Tracks</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-list"></i>
+                        <div class="stat-info">
+                            <h3 id="totalPlaylists">0</h3>
+                            <p>Playlists</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-user"></i>
+                        <div class="stat-info">
+                            <h3 id="totalArtists">0</h3>
+                            <p>Artists</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-compact-disc"></i>
+                        <div class="stat-info">
+                            <h3 id="totalAlbums">0</h3>
+                            <p>Albums</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-actions">
+                    <button class="btn-primary" id="scanLibrary">
+                        <i class="fas fa-sync"></i>
+                        Scan Library
+                    </button>
+                    <button class="btn-primary" id="uploadMusic">
+                        <i class="fas fa-upload"></i>
+                        Upload Music
+                    </button>
+                </div>
+                
+                <div class="admin-table">
+                    <h2>All Tracks</h2>
+                    <div class="table-controls">
+                        <input type="text" placeholder="Filter tracks..." id="adminSearch">
+                        <select id="sortBy">
+                            <option value="title">Title</option>
+                            <option value="artist">Artist</option>
+                            <option value="album">Album</option>
+                            <option value="duration">Duration</option>
+                        </select>
+                    </div>
+                    <div class="tracks-table" id="adminTracksTable">
+                        <!-- Dynamically populated with virtual scrolling -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playlist Detail View -->
+            <div class="view hidden" id="playlistView">
+                <div class="playlist-header">
+                    <div class="playlist-cover" id="playlistCover">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="playlist-info">
+                        <span class="playlist-type">PLAYLIST</span>
+                        <h1 id="playlistTitle">Playlist Name</h1>
+                        <p id="playlistDescription">Playlist description</p>
+                        <div class="playlist-meta">
+                            <span id="playlistTrackCount">0 songs</span>
+                            <span id="playlistDuration">0 min</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="playlist-actions">
+                    <button class="btn-primary btn-play" id="playPlaylist">
+                        <i class="fas fa-play"></i>
+                        Play
+                    </button>
+                    <button class="btn-icon" id="shufflePlaylist">
+                        <i class="fas fa-random"></i>
+                    </button>
+                </div>
+                <div class="playlist-tracks" id="playlistTracks">
+                    <!-- Dynamically populated with virtual scrolling -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Music Player -->
+    <div class="player" id="player">
+        <div class="player-track-info">
+            <div class="track-cover" id="playerCover">
+                <i class="fas fa-music"></i>
+            </div>
+            <div class="track-details">
+                <div class="track-title" id="playerTitle">No track playing</div>
+                <div class="track-artist" id="playerArtist">-</div>
+            </div>
+            <button class="btn-icon" id="likeTrack">
+                <i class="far fa-heart"></i>
+            </button>
+        </div>
+        
+        <div class="player-controls">
+            <div class="control-buttons">
+                <button class="btn-icon" id="shuffleBtn">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button class="btn-icon" id="prevBtn">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="btn-icon btn-play-main" id="playBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="btn-icon" id="nextBtn">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <button class="btn-icon" id="repeatBtn">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+            <div class="progress-bar-wrapper">
+                <span class="time-current" id="currentTime">0:00</span>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                    <div class="progress-handle" id="progressHandle"></div>
+                </div>
+                <span class="time-total" id="totalTime">0:00</span>
+            </div>
+        </div>
+        
+        <div class="player-volume">
+            <button class="btn-icon" id="volumeBtn">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <div class="volume-slider">
+                <input type="range" min="0" max="100" value="70" id="volumeControl">
+            </div>
+            <button class="btn-icon" id="queueBtn">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Queue Sidebar -->
+    <aside class="queue-sidebar hidden" id="queueSidebar">
+        <div class="queue-header">
+            <h3>Queue</h3>
+            <button class="btn-icon" id="closeQueue">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="queue-list" id="queueList">
+            <!-- Dynamically populated -->
+        </div>
+    </aside>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <a href="#home" class="mobile-nav-item active" data-view="home">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#search" class="mobile-nav-item" data-view="search">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+        </a>
+        <a href="#library" class="mobile-nav-item" data-view="library">
+            <i class="fas fa-book"></i>
+            <span>Library</span>
+        </a>
+        <a href="#admin" class="mobile-nav-item" data-view="admin">
+            <i class="fas fa-cog"></i>
+            <span>Admin</span>
+        </a>
+    </nav>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

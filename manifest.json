@@ -1,0 +1,54 @@
+{
+  "name": "JukeBx",
+  "short_name": "JukeBx",
+  "description": "A sleek, self-hosted music streaming alternative powered by LMF",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1db954",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/1db954/ffffff?text=JB",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/1db954/ffffff?text=JB",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Search",
+      "short_name": "Search",
+      "description": "Search for music",
+      "url": "/#search",
+      "icons": [
+        {
+          "src": "https://via.placeholder.com/96x96/1db954/ffffff?text=S",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Library",
+      "short_name": "Library",
+      "description": "Browse your library",
+      "url": "/#library",
+      "icons": [
+        {
+          "src": "https://via.placeholder.com/96x96/1db954/ffffff?text=L",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
