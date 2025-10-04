@@ -321,6 +321,214 @@
         </a>
     </nav>
 
+    <!-- User Profile Modal -->
+    <div class="modal hidden" id="profileModal">
+        <div class="modal-overlay" id="profileModalOverlay"></div>
+        <div class="modal-content profile-modal-content">
+            <div class="modal-header">
+                <h2>Profile</h2>
+                <button class="btn-icon" id="closeProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="profile-section">
+                    <div class="profile-header-section">
+                        <div class="profile-avatar" id="profileAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-header-info">
+                            <h3 id="profileDisplayName">Loading...</h3>
+                            <p class="profile-username" id="profileUsername">@username</p>
+                            <p class="profile-member-since" id="profileMemberSince">Member since</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="profileFollowers">0</span>
+                            <span class="stat-label">Followers</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="profileFollowing">0</span>
+                            <span class="stat-label">Following</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="profilePlaylists">0</span>
+                            <span class="stat-label">Playlists</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-tabs">
+                        <button class="profile-tab-btn active" data-profile-tab="info">
+                            <i class="fas fa-user"></i>
+                            Profile Info
+                        </button>
+                        <button class="profile-tab-btn" data-profile-tab="stats">
+                            <i class="fas fa-chart-bar"></i>
+                            Statistics
+                        </button>
+                        <button class="profile-tab-btn" data-profile-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </button>
+                    </div>
+
+                    <!-- Profile Info Tab -->
+                    <div class="profile-tab-content active" id="profileInfoTab">
+                        <div class="form-group">
+                            <label>Display Name</label>
+                            <input type="text" id="editDisplayName" placeholder="Your display name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="editEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Bio</label>
+                            <textarea id="editBio" rows="3" placeholder="Tell us about yourself..."></textarea>
+                        </div>
+                        <button class="btn-primary" id="saveProfileBtn">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                    </div>
+
+                    <!-- Statistics Tab -->
+                    <div class="profile-tab-content hidden" id="profileStatsTab">
+                        <div class="stats-grid">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h4 id="statsListeningTime">0 hours</h4>
+                                    <p>Total Listening Time</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h4 id="statsTotalTracks">0</h4>
+                                    <p>Tracks in Library</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h4 id="statsLikedSongs">0</h4>
+                                    <p>Liked Songs</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h4 id="statsPlaylistsCreated">0</h4>
+                                    <p>Playlists Created</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-guitar"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h4 id="statsTopGenre">Unknown</h4>
+                                    <p>Top Genre</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-microphone"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h4 id="statsTopArtist">Unknown</h4>
+                                    <p>Top Artist</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div class="profile-tab-content hidden" id="profileSettingsTab">
+                        <div class="settings-section">
+                            <h4>Playback</h4>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">Autoplay</span>
+                                    <span class="setting-description">Continue playing similar tracks when your music ends</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="settingAutoplay">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">Crossfade</span>
+                                    <span class="setting-description">Fade between songs</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="settingCrossfade">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">Normalize Volume</span>
+                                    <span class="setting-description">Set the same volume level for all songs</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="settingNormalizeVolume">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>Content</h4>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">Show Explicit Content</span>
+                                    <span class="setting-description">Allow playback of explicit-rated music</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="settingExplicitContent">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>Language</h4>
+                            <div class="form-group">
+                                <select id="settingLanguage">
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="it">Italiano</option>
+                                    <option value="pt">Português</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" id="saveSettingsBtn">
+                            <i class="fas fa-save"></i>
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script type="module" src="js/main.js"></script>
 </body>
