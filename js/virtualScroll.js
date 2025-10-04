@@ -122,7 +122,7 @@ export class VirtualScroller {
  * Create a track row element for virtual scrolling
  */
 export function createTrackRow(track, index, options = {}) {
-    const { showAlbum = true, showNumber = true, onPlay, onMenu } = options;
+    const { showAlbum = true, showNumber = true, onPlay, onMenu, onDownload } = options;
     
     const row = document.createElement('div');
     row.className = 'track-row';
@@ -169,6 +169,24 @@ export function createTrackRow(track, index, options = {}) {
     // Actions
     const actionsCell = document.createElement('div');
     actionsCell.className = 'track-actions';
+    
+    // Download button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'btn-icon';
+    downloadBtn.title = 'Download track';
+    downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+    downloadBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (onDownload) {
+            onDownload(track);
+        } else {
+            // Import ui dynamically to avoid circular dependency
+            import('./ui.js').then(module => {
+                module.ui.downloadTrack(track.id);
+            });
+        }
+    };
+    actionsCell.appendChild(downloadBtn);
     
     const moreBtn = document.createElement('button');
     moreBtn.className = 'btn-icon';

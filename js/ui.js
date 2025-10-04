@@ -103,6 +103,8 @@ class UIController {
         this.elements.playlistTrackCount = document.getElementById('playlistTrackCount');
         this.elements.playlistDuration = document.getElementById('playlistDuration');
         this.elements.playPlaylist = document.getElementById('playPlaylist');
+        this.elements.downloadPlaylist = document.getElementById('downloadPlaylist');
+        this.elements.deletePlaylist = document.getElementById('deletePlaylist');
 
         // Profile Modal
         this.elements.userProfileBtn = document.getElementById('userProfile');
@@ -269,11 +271,17 @@ class UIController {
         });
 
         // Create playlist
-        this.elements.createPlaylist?.addEventListener('click', () => {
+        this.elements.createPlaylist?.addEventListener('click', async () => {
             const name = prompt('Enter playlist name:');
             if (name) {
-                alert(`Playlist "${name}" created!\nIn production, this would save to the backend.`);
-                this.loadPlaylists();
+                try {
+                    await api.createPlaylist(name);
+                    await this.loadPlaylists();
+                    this.showNotification('Playlist created successfully!', 'success');
+                } catch (error) {
+                    console.error('Error creating playlist:', error);
+                    this.showNotification('Failed to create playlist', 'error');
+                }
             }
         });
 
@@ -282,6 +290,20 @@ class UIController {
             if (this.currentPlaylist) {
                 const playlist = await api.getPlaylist(this.currentPlaylist.id);
                 player.setQueue(playlist.tracks, 0);
+            }
+        });
+
+        // Download playlist
+        this.elements.downloadPlaylist?.addEventListener('click', async () => {
+            if (this.currentPlaylist) {
+                await this.downloadPlaylist(this.currentPlaylist.id);
+            }
+        });
+
+        // Delete playlist
+        this.elements.deletePlaylist?.addEventListener('click', async () => {
+            if (this.currentPlaylist) {
+                await this.deletePlaylistConfirm(this.currentPlaylist.id);
             }
         });
 
@@ -901,6 +923,117 @@ class UIController {
             this.elements.saveSettingsBtn.disabled = false;
             this.elements.saveSettingsBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
         }
+    }
+
+    /**
+     * Download playlist
+     */
+    async downloadPlaylist(playlistId) {
+        const btn = this.elements.downloadPlaylist;
+        const originalHTML = btn.innerHTML;
+        
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            const result = await api.downloadPlaylist(playlistId);
+            this.showNotification(`Playlist downloaded successfully! (${result.tracksCount} tracks)`, 'success');
+        } catch (error) {
+            console.error('Error downloading playlist:', error);
+            this.showNotification('Failed to download playlist', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    }
+
+    /**
+     * Delete playlist with confirmation
+     */
+    async deletePlaylistConfirm(playlistId) {
+        const playlist = this.currentPlaylist;
+        if (!playlist) return;
+
+        const confirmed = confirm(
+            `Are you sure you want to delete "${playlist.name}"?\\n\\n` +
+            `This will permanently remove the playlist and cannot be undone.`
+        );
+
+        if (!confirmed) return;
+
+        const btn = this.elements.deletePlaylist;
+        const originalHTML = btn.innerHTML;
+        
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            await api.deletePlaylist(playlistId);
+            this.showNotification('Playlist deleted successfully', 'success');
+            
+            // Refresh playlists list
+            await this.loadPlaylists();
+            
+            // Navigate back to home
+            this.switchView('home');
+        } catch (error) {
+            console.error('Error deleting playlist:', error);
+            this.showNotification('Failed to delete playlist', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    }
+
+    /**
+     * Download individual track
+     */
+    async downloadTrack(trackId) {
+        try {
+            this.showNotification('Starting download...', 'info');
+            await api.downloadTrack(trackId);
+            this.showNotification('Track downloaded successfully!', 'success');
+        } catch (error) {
+            console.error('Error downloading track:', error);
+            this.showNotification('Failed to download track', 'error');
+        }
+    }
+
+    /**
+     * Show notification toast
+     */
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <i class="fas ${this.getNotificationIcon(type)}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add to document
+        document.body.appendChild(notification);
+        
+        // Trigger animation
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        // Remove after delay
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    /**
+     * Get icon for notification type
+     */
+    getNotificationIcon(type) {
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        return icons[type] || icons.info;
     }
 }
 
