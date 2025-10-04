@@ -131,7 +131,9 @@ class MockDataGenerator {
                 crossfade: false,
                 normalizeVolume: true,
                 showExplicitContent: true,
-                language: 'en'
+                language: 'en',
+                socialStats: true,
+                publicProfile: false
             },
             statistics: {
                 totalListeningTime: 125430, // minutes
@@ -141,6 +143,39 @@ class MockDataGenerator {
                 playlistsCreated: 15,
                 likedSongs: 347
             }
+        };
+    }
+
+    generateArtistStats(artistName) {
+        const artistTracks = this.tracks.filter(t => t.artist === artistName);
+        const listeningTime = Math.floor(Math.random() * 500) + 50; // 50-550 hours
+        const playCount = Math.floor(Math.random() * 1000) + 100;
+        const likedTracks = artistTracks.filter(t => t.liked).length;
+        const rank = Math.floor(Math.random() * 10) + 1;
+        
+        // Generate top tracks (most played by user)
+        const topTracks = artistTracks
+            .slice(0, 5)
+            .map(track => ({
+                ...track,
+                userPlayCount: Math.floor(Math.random() * 100) + 10
+            }))
+            .sort((a, b) => b.userPlayCount - a.userPlayCount);
+        
+        // Generate listening timeline (last 6 months)
+        const timeline = Array.from({ length: 6 }, (_, i) => ({
+            month: new Date(Date.now() - (5 - i) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short' }),
+            hours: Math.floor(Math.random() * 100) + 10
+        }));
+        
+        return {
+            artistName,
+            listeningTime,
+            playCount,
+            likedTracks,
+            rank,
+            topTracks,
+            timeline
         };
     }
 }
@@ -560,6 +595,58 @@ class APIService {
         return this.request(this.config.endpoints.playlists, {
             method: 'POST',
             body: { name, description }
+        });
+    }
+
+    /**
+     * Get artist details with tracks
+     */
+    async getArtist(artistName) {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const artist = mockData.artists.find(a => a.name === artistName);
+            if (!artist) {
+                throw new Error('Artist not found');
+            }
+            const tracks = mockData.tracks.filter(t => t.artist === artistName);
+            return {
+                ...artist,
+                tracks,
+                trackCount: tracks.length
+            };
+        }
+
+        return this.request(`${this.config.endpoints.artists}/${encodeURIComponent(artistName)}`);
+    }
+
+    /**
+     * Get artist listening statistics for current user
+     */
+    async getArtistStats(artistName) {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 150));
+            return mockData.generateArtistStats(artistName);
+        }
+
+        return this.request(`${this.config.endpoints.artists}/${encodeURIComponent(artistName)}/stats`);
+    }
+
+    /**
+     * Toggle artist follow status
+     */
+    async toggleFollowArtist(artistName) {
+        if (this.config.useMock) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const artist = mockData.artists.find(a => a.name === artistName);
+            if (artist) {
+                artist.followed = !artist.followed;
+                return artist.followed;
+            }
+            return false;
+        }
+
+        return this.request(`${this.config.endpoints.artists}/${encodeURIComponent(artistName)}/follow`, {
+            method: 'POST'
         });
     }
 }
