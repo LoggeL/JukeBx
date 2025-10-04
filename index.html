@@ -200,6 +200,103 @@
                 </div>
             </div>
 
+            <!-- Artist Detail View -->
+            <div class="view hidden" id="artistView">
+                <div class="artist-header">
+                    <div class="artist-cover" id="artistCover">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="artist-info">
+                        <span class="artist-type">ARTIST</span>
+                        <h1 id="artistName">Artist Name</h1>
+                        <p id="artistBio">Artist biography</p>
+                        <div class="artist-meta">
+                            <span id="artistFollowers">0 followers</span>
+                            <span id="artistTracks">0 tracks</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Social Stats Section (Collapsible) -->
+                <div class="social-stats-section" id="artistSocialStats">
+                    <button class="stats-toggle" id="toggleArtistStats">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Your Listening Stats</span>
+                        <i class="fas fa-chevron-down expand-icon"></i>
+                    </button>
+                    <div class="stats-content collapsed" id="artistStatsContent">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4 id="artistListeningTime">0 hours</h4>
+                                    <p>Time Listening</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-play-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4 id="artistPlayCount">0</h4>
+                                    <p>Total Plays</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4 id="artistLikedTracks">0</h4>
+                                    <p>Liked Songs</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4 id="artistRank">#0</h4>
+                                    <p>In Your Top Artists</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="top-tracks-section">
+                            <h3>Your Most Played Tracks</h3>
+                            <div id="artistTopTracks">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                        
+                        <div class="listening-timeline">
+                            <h3>Listening Over Time</h3>
+                            <div class="timeline-chart" id="artistTimeline">
+                                <!-- Simple visualization of listening activity -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="artist-actions">
+                    <button class="btn-primary btn-play" id="playArtist">
+                        <i class="fas fa-play"></i>
+                        Play
+                    </button>
+                    <button class="btn-icon" id="shuffleArtist">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button class="btn-icon" id="followArtist" title="Follow artist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="artist-tracks" id="artistTracks">
+                    <!-- Dynamically populated with virtual scrolling -->
+                </div>
+            </div>
+
             <!-- Playlist Detail View -->
             <div class="view hidden" id="playlistView">
                 <div class="playlist-header">
@@ -506,6 +603,30 @@
                                 </div>
                                 <label class="switch">
                                     <input type="checkbox" id="settingExplicitContent">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h4>Social Features</h4>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">Enable Social Statistics</span>
+                                    <span class="setting-description">Show your listening stats on artist and album pages</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="settingSocialStats">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">Public Profile</span>
+                                    <span class="setting-description">Allow others to see your listening activity</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="settingPublicProfile">
                                     <span class="slider"></span>
                                 </label>
                             </div>

@@ -33,7 +33,8 @@ class UIController {
             search: document.getElementById('searchView'),
             library: document.getElementById('libraryView'),
             admin: document.getElementById('adminView'),
-            playlist: document.getElementById('playlistView')
+            playlist: document.getElementById('playlistView'),
+            artist: document.getElementById('artistView')
         };
 
         // Navigation
@@ -143,8 +144,31 @@ class UIController {
         this.elements.settingCrossfade = document.getElementById('settingCrossfade');
         this.elements.settingNormalizeVolume = document.getElementById('settingNormalizeVolume');
         this.elements.settingExplicitContent = document.getElementById('settingExplicitContent');
+        this.elements.settingSocialStats = document.getElementById('settingSocialStats');
+        this.elements.settingPublicProfile = document.getElementById('settingPublicProfile');
         this.elements.settingLanguage = document.getElementById('settingLanguage');
         this.elements.saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+        // Artist View
+        this.elements.artistName = document.getElementById('artistName');
+        this.elements.artistBio = document.getElementById('artistBio');
+        this.elements.artistFollowers = document.getElementById('artistFollowers');
+        this.elements.artistTracksCount = document.getElementById('artistTracks');
+        this.elements.artistTracksContainer = document.querySelector('#artistView .artist-tracks');
+        this.elements.playArtist = document.getElementById('playArtist');
+        this.elements.shuffleArtist = document.getElementById('shuffleArtist');
+        this.elements.followArtist = document.getElementById('followArtist');
+        
+        // Artist Social Stats
+        this.elements.artistSocialStats = document.getElementById('artistSocialStats');
+        this.elements.toggleArtistStats = document.getElementById('toggleArtistStats');
+        this.elements.artistStatsContent = document.getElementById('artistStatsContent');
+        this.elements.artistListeningTime = document.getElementById('artistListeningTime');
+        this.elements.artistPlayCount = document.getElementById('artistPlayCount');
+        this.elements.artistLikedTracks = document.getElementById('artistLikedTracks');
+        this.elements.artistRank = document.getElementById('artistRank');
+        this.elements.artistTopTracks = document.getElementById('artistTopTracks');
+        this.elements.artistTimeline = document.getElementById('artistTimeline');
     }
 
     setupEventListeners() {
@@ -338,6 +362,45 @@ class UIController {
         this.elements.saveSettingsBtn?.addEventListener('click', () => {
             this.saveSettings();
         });
+
+        // Artist page actions
+        this.elements.playArtist?.addEventListener('click', () => {
+            if (this.currentArtist && this.currentArtist.tracks) {
+                player.setQueue(this.currentArtist.tracks, 0);
+            }
+        });
+
+        this.elements.shuffleArtist?.addEventListener('click', () => {
+            if (this.currentArtist && this.currentArtist.tracks) {
+                const shuffled = [...this.currentArtist.tracks].sort(() => Math.random() - 0.5);
+                player.setQueue(shuffled, 0);
+            }
+        });
+
+        this.elements.followArtist?.addEventListener('click', async () => {
+            if (this.currentArtist) {
+                const followed = await api.toggleFollowArtist(this.currentArtist.name);
+                this.elements.followArtist.innerHTML = followed
+                    ? '<i class="fas fa-heart"></i>'
+                    : '<i class="far fa-heart"></i>';
+            }
+        });
+
+        // Toggle artist stats
+        this.elements.toggleArtistStats?.addEventListener('click', () => {
+            const content = this.elements.artistStatsContent;
+            const icon = this.elements.toggleArtistStats.querySelector('.expand-icon');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('collapsed');
+                content.classList.remove('expanded');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
     }
 
     setupPlayerListeners() {
@@ -370,10 +433,19 @@ class UIController {
         try {
             await Promise.all([
                 this.loadHomeData(),
-                this.loadPlaylists()
+                this.loadPlaylists(),
+                this.loadUserProfile()
             ]);
         } catch (error) {
             console.error('Error loading initial data:', error);
+        }
+    }
+
+    async loadUserProfile() {
+        try {
+            this.userProfile = await api.getUserProfile();
+        } catch (error) {
+            console.error('Error loading user profile:', error);
         }
     }
 
@@ -568,6 +640,7 @@ class UIController {
                 <div class="card-title">${artist.name}</div>
                 <div class="card-subtitle">Artist</div>
             `;
+            card.addEventListener('click', () => this.showArtist(artist.name));
             grid.appendChild(card);
         });
         
@@ -796,8 +869,8 @@ class UIController {
     // Profile Modal Methods
     async showProfileModal() {
         try {
-            // Load profile data
-            this.userProfile = await api.getUserProfile();
+            // Load/refresh profile data
+            await this.loadUserProfile();
             this.populateProfile();
             
             // Show modal
@@ -847,6 +920,8 @@ class UIController {
         this.elements.settingCrossfade.checked = this.userProfile.preferences.crossfade;
         this.elements.settingNormalizeVolume.checked = this.userProfile.preferences.normalizeVolume;
         this.elements.settingExplicitContent.checked = this.userProfile.preferences.showExplicitContent;
+        this.elements.settingSocialStats.checked = this.userProfile.preferences.socialStats ?? true;
+        this.elements.settingPublicProfile.checked = this.userProfile.preferences.publicProfile ?? false;
         this.elements.settingLanguage.value = this.userProfile.preferences.language;
     }
 
@@ -901,6 +976,8 @@ class UIController {
                 crossfade: this.elements.settingCrossfade.checked,
                 normalizeVolume: this.elements.settingNormalizeVolume.checked,
                 showExplicitContent: this.elements.settingExplicitContent.checked,
+                socialStats: this.elements.settingSocialStats.checked,
+                publicProfile: this.elements.settingPublicProfile.checked,
                 language: this.elements.settingLanguage.value
             };
 
@@ -923,6 +1000,147 @@ class UIController {
             this.elements.saveSettingsBtn.disabled = false;
             this.elements.saveSettingsBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
         }
+    }
+
+    /**
+     * Show artist detail page
+     */
+    async showArtist(artistName) {
+        try {
+            const artist = await api.getArtist(artistName);
+            this.currentArtist = artist;
+            
+            // Update artist info
+            this.elements.artistName.textContent = artist.name;
+            this.elements.artistBio.textContent = artist.bio || 'No biography available';
+            this.elements.artistFollowers.textContent = `${artist.followers?.toLocaleString() || 0} followers`;
+            this.elements.artistTracksCount.textContent = `${artist.trackCount} tracks`;
+            
+            // Update follow button
+            this.elements.followArtist.innerHTML = artist.followed
+                ? '<i class="fas fa-heart"></i>'
+                : '<i class="far fa-heart"></i>';
+            
+            // Check if social stats are enabled
+            if (this.userProfile?.preferences?.socialStats) {
+                this.elements.artistSocialStats.style.display = 'block';
+                await this.loadArtistStats(artistName);
+            } else {
+                this.elements.artistSocialStats.style.display = 'none';
+            }
+            
+            // Render artist tracks
+            this.renderArtistTracks(artist.tracks);
+            
+            this.switchView('artist');
+        } catch (error) {
+            console.error('Error loading artist:', error);
+            this.showNotification('Failed to load artist', 'error');
+        }
+    }
+
+    /**
+     * Load and display artist listening statistics
+     */
+    async loadArtistStats(artistName) {
+        try {
+            const stats = await api.getArtistStats(artistName);
+            
+            // Update stat cards
+            this.elements.artistListeningTime.textContent = `${stats.listeningTime.toLocaleString()} hours`;
+            this.elements.artistPlayCount.textContent = stats.playCount.toLocaleString();
+            this.elements.artistLikedTracks.textContent = stats.likedTracks;
+            this.elements.artistRank.textContent = `#${stats.rank}`;
+            
+            // Render top tracks
+            this.renderArtistTopTracks(stats.topTracks);
+            
+            // Render timeline chart
+            this.renderArtistTimeline(stats.timeline);
+        } catch (error) {
+            console.error('Error loading artist stats:', error);
+        }
+    }
+
+    /**
+     * Render artist's top tracks for this user
+     */
+    renderArtistTopTracks(topTracks) {
+        this.elements.artistTopTracks.innerHTML = '';
+        
+        topTracks.forEach((track, index) => {
+            const trackEl = document.createElement('div');
+            trackEl.className = 'top-track-item';
+            trackEl.innerHTML = `
+                <span class="track-rank">${index + 1}</span>
+                <div class="track-info">
+                    <div class="track-title">${track.title}</div>
+                    <div class="track-plays">${track.userPlayCount} plays</div>
+                </div>
+                <button class="btn-icon play-track">
+                    <i class="fas fa-play"></i>
+                </button>
+            `;
+            
+            trackEl.querySelector('.play-track').addEventListener('click', (e) => {
+                e.stopPropagation();
+                player.setQueue([track], 0);
+            });
+            
+            this.elements.artistTopTracks.appendChild(trackEl);
+        });
+    }
+
+    /**
+     * Render listening timeline chart
+     */
+    renderArtistTimeline(timeline) {
+        this.elements.artistTimeline.innerHTML = '';
+        
+        const maxHours = Math.max(...timeline.map(t => t.hours));
+        
+        timeline.forEach(period => {
+            const barHeight = (period.hours / maxHours) * 100;
+            
+            const barEl = document.createElement('div');
+            barEl.className = 'timeline-bar';
+            barEl.innerHTML = `
+                <div class="bar" style="height: ${barHeight}%">
+                    <span class="bar-value">${period.hours}h</span>
+                </div>
+                <div class="bar-label">${period.month}</div>
+            `;
+            
+            this.elements.artistTimeline.appendChild(barEl);
+        });
+    }
+
+    /**
+     * Render artist tracks with virtual scrolling
+     */
+    renderArtistTracks(tracks) {
+        // Clear existing scroller
+        if (this.virtualScrollers.has('artist')) {
+            this.virtualScrollers.get('artist').destroy();
+        }
+
+        this.elements.artistTracksContainer.innerHTML = '';
+        
+        // Create virtual scroller
+        const scroller = new VirtualScroller(this.elements.artistTracksContainer, {
+            itemHeight: 56,
+            renderItem: (track, index) => createTrackRow(track, index, {
+                onPlay: (track, index) => {
+                    player.setQueue(tracks, index);
+                }
+            }),
+            onItemClick: (track, index) => {
+                player.setQueue(tracks, index);
+            }
+        });
+
+        scroller.setItems(tracks);
+        this.virtualScrollers.set('artist', scroller);
     }
 
     /**

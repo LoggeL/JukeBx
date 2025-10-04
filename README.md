@@ -32,6 +32,14 @@ JukeBx is a modern, responsive web-based music streaming application designed to
 - Volume control
 - Progress tracking
 
+### 🌟 **Social Listening Features** (Opt-in)
+- Personal listening statistics on artist pages
+- Expandable/collapsible stats sections for clean UI
+- Track your listening hours per artist
+- View your most played tracks from each artist
+- See listening trends over time with timeline charts
+- Privacy-focused: Enable/disable in settings
+
 ### 🔍 **Smart Search**
 - Real-time search across tracks, artists, and playlists
 - Instant results with debouncing for performance
@@ -205,15 +213,17 @@ jukebx/
 
 ## 🔮 Future Enhancements
 
+- [x] Social features (personal listening statistics)
 - [ ] Service Worker for offline playback
 - [ ] Advanced audio features (equalizer, crossfade)
-- [ ] Social features (sharing, collaborative playlists)
+- [ ] Social sharing and collaborative playlists
 - [ ] Music visualization
 - [ ] Lyrics integration
 - [ ] Podcast support
 - [ ] Integration with music file metadata editors
 - [ ] Progressive Web App (PWA) support
 - [ ] Multi-language support
+- [ ] Yearly listening reports ("Wrapped" style)
 
 ## 🤝 Contributing
 
