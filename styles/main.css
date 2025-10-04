@@ -856,12 +856,18 @@ body {
 @media (max-width: 768px) {
     :root {
         --sidebar-width: 0;
+        --player-height-mobile: 140px;
     }
     
     .sidebar {
         transform: translateX(-100%);
         width: 240px;
+        height: calc(100vh - var(--player-height-mobile));
         z-index: 300;
+    }
+    
+    .queue-sidebar {
+        height: calc(100vh - var(--player-height-mobile));
     }
     
     .sidebar.open {
@@ -874,7 +880,7 @@ body {
     
     .main-content {
         margin-left: 0;
-        height: calc(100vh - var(--player-height) - var(--mobile-nav-height));
+        height: calc(100vh - var(--player-height-mobile) - var(--mobile-nav-height));
     }
     
     .top-bar {
@@ -886,17 +892,31 @@ body {
     }
     
     .player {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
         padding: var(--spacing-sm);
+        height: var(--player-height-mobile);
+    }
+    
+    .player-track-info {
+        grid-column: 1 / -1;
+        order: 1;
+        min-width: 0;
+        padding-bottom: var(--spacing-sm);
     }
     
     .player-controls {
         grid-column: 1 / -1;
-        order: -1;
+        order: 2;
     }
     
     .player-volume {
         display: none;
+    }
+    
+    .track-cover {
+        width: 48px;
+        height: 48px;
     }
     
     .view h1 {
