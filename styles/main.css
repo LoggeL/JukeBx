@@ -860,6 +860,8 @@ body {
     
     .sidebar {
         transform: translateX(-100%);
+        width: 240px;
+        z-index: 300;
     }
     
     .sidebar.open {
@@ -873,6 +875,10 @@ body {
     .main-content {
         margin-left: 0;
         height: calc(100vh - var(--player-height) - var(--mobile-nav-height));
+    }
+    
+    .top-bar {
+        z-index: 50;
     }
     
     .mobile-nav {
