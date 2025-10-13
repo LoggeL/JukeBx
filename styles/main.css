@@ -29,6 +29,27 @@
     
     /* Transitions */
     --transition: all 0.2s ease;
+    --transition-fast: all 0.15s ease;
+}
+
+/* Performance Optimizations */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* GPU Acceleration for animations */
+.card,
+.btn-icon,
+.btn-primary,
+.card-play,
+.image-container,
+.lazy-image,
+.image-placeholder {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 * {
@@ -288,11 +309,13 @@ body {
     padding: var(--spacing-md);
     border-radius: 8px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-fast);
+    contain: layout style paint;
 }
 
 .card:hover {
     background: var(--border);
+    transform: translateY(-2px);
 }
 
 .card-cover {
@@ -1978,13 +2001,106 @@ input:checked + .slider:before {
 
 /* Minimalistic adjustments */
 .view h1 {
-    font-size: 36px;
+    font-size: 32px;
     margin-bottom: var(--spacing-md);
     font-weight: 700;
 }
 
 .content-section h2 {
-    font-size: 20px;
+    font-size: 18px;
     margin-bottom: var(--spacing-md);
     font-weight: 600;
+}
+
+/* Blurhash Image Loader Styles */
+.image-container {
+    position: relative;
+    overflow: hidden;
+    background: var(--background-elevated);
+    border-radius: inherit;
+}
+
+.image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.lazy-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.lazy-image[data-loaded="true"] {
+    opacity: 1;
+}
+
+/* Simplified source badges */
+.source-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.source-badge.youtube {
+    background: #ff0000;
+    color: white;
+}
+
+.source-badge.soundcloud {
+    background: #ff5500;
+    color: white;
+}
+
+.source-badge.deezer {
+    background: #00c4ff;
+    color: white;
+}
+
+/* Optimized animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.2s ease;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

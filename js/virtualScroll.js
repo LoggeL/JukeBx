@@ -3,6 +3,8 @@
  * Optimized for rendering large playlists efficiently
  */
 
+import { createAlbumCover } from './imageLoader.js';
+
 export class VirtualScroller {
     constructor(container, options = {}) {
         this.container = container;
@@ -238,27 +240,25 @@ export function formatDuration(seconds) {
 }
 
 /**
- * Create a playlist card element
+ * Create a playlist card element with blurhash
  */
 export function createPlaylistCard(playlist) {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.playlistId = playlist.id;
     
-    const cover = document.createElement('div');
-    cover.className = 'card-cover';
-    if (playlist.coverUrl) {
-        const img = document.createElement('img');
-        img.src = playlist.coverUrl;
-        img.alt = playlist.name;
-        cover.appendChild(img);
-    } else {
-        cover.innerHTML = '<i class="fas fa-music"></i>';
-    }
+    // Use blurhash-enabled cover
+    const cover = createAlbumCover(playlist.coverUrl, {
+        className: 'card-cover',
+        fallbackIcon: 'fas fa-music',
+        blurhashType: 'warm',
+        size: 300
+    });
     
     const playBtn = document.createElement('button');
     playBtn.className = 'card-play';
     playBtn.innerHTML = '<i class="fas fa-play"></i>';
+    playBtn.setAttribute('aria-label', 'Play playlist');
     cover.appendChild(playBtn);
     
     card.appendChild(cover);
@@ -277,27 +277,25 @@ export function createPlaylistCard(playlist) {
 }
 
 /**
- * Create a track card element
+ * Create a track card element with blurhash
  */
 export function createTrackCard(track) {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.trackId = track.id;
     
-    const cover = document.createElement('div');
-    cover.className = 'card-cover';
-    if (track.coverUrl) {
-        const img = document.createElement('img');
-        img.src = track.coverUrl;
-        img.alt = track.title;
-        cover.appendChild(img);
-    } else {
-        cover.innerHTML = '<i class="fas fa-music"></i>';
-    }
+    // Use blurhash-enabled cover
+    const cover = createAlbumCover(track.coverUrl, {
+        className: 'card-cover',
+        fallbackIcon: 'fas fa-music',
+        blurhashType: 'vibrant',
+        size: 300
+    });
     
     const playBtn = document.createElement('button');
     playBtn.className = 'card-play';
     playBtn.innerHTML = '<i class="fas fa-play"></i>';
+    playBtn.setAttribute('aria-label', `Play ${track.title}`);
     cover.appendChild(playBtn);
     
     card.appendChild(cover);
@@ -306,11 +304,12 @@ export function createTrackCard(track) {
     title.className = 'card-title';
     title.textContent = track.title;
     
-    // Add source badge
-    if (track.source) {
+    // Add source badge (simplified)
+    if (track.source && track.source !== 'local') {
         const sourceBadge = document.createElement('span');
         sourceBadge.className = `source-badge ${track.source}`;
-        sourceBadge.textContent = track.source === 'local' ? '♪' : track.source;
+        sourceBadge.textContent = track.source.charAt(0).toUpperCase();
+        sourceBadge.setAttribute('title', `Source: ${track.source}`);
         title.appendChild(sourceBadge);
     }
     
