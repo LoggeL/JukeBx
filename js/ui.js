@@ -44,6 +44,7 @@ class UIController {
         this.elements.mobileNavItems = document.querySelectorAll('.mobile-nav-item');
         this.elements.sidebar = document.getElementById('sidebar');
         this.elements.sidebarToggle = document.getElementById('sidebarToggle');
+        this.elements.sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
 
         // Player
         this.elements.player = {
@@ -182,6 +183,10 @@ class UIController {
 
         // Sidebar toggle (mobile)
         this.elements.sidebarToggle?.addEventListener('click', () => {
+            this.elements.sidebar.classList.toggle('open');
+        });
+
+        this.elements.sidebarToggleMobile?.addEventListener('click', () => {
             this.elements.sidebar.classList.toggle('open');
         });
 
@@ -399,6 +404,10 @@ class UIController {
 
         player.on('queuechange', (queue) => {
             this.updateQueue(queue);
+        });
+
+        player.on('queueindexchange', (index) => {
+            this.highlightQueueIndex(index);
         });
 
         player.on('volumechange', (volume) => {
@@ -920,6 +929,13 @@ class UIController {
             });
             
             this.elements.queueList.appendChild(item);
+        });
+    }
+
+    highlightQueueIndex(currentIndex) {
+        const items = this.elements.queueList.querySelectorAll('.queue-item');
+        items.forEach((el, index) => {
+            el.classList.toggle('playing', index === currentIndex);
         });
     }
 

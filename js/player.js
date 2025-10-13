@@ -76,19 +76,14 @@ class MusicPlayer {
     async playTrack(track, fromQueue = false) {
         try {
             this.currentTrack = track;
-            
-            // In mock mode, we don't have real audio files
-            // For demo purposes, we'll use a silent audio or placeholder
-            // In production, this would be: this.audio.src = track.audioUrl;
-            
-            // Mock: Create a silent audio context for demo
+
+            // Demo mode: use silent audio; in production set real audio URL
             this.audio.src = this.createSilentAudio(track.duration);
-            
+
+            // Always notify listeners when the track changes
+            this.emit('trackchange', track);
+
             await this.audio.play();
-            
-            if (!fromQueue) {
-                this.emit('trackchange', track);
-            }
         } catch (error) {
             console.error('Error playing track:', error);
             this.emit('error', error);
