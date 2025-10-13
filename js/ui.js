@@ -6,6 +6,8 @@
 import { api } from './api.js';
 import { player } from './player.js';
 import { VirtualScroller, createTrackRow, createPlaylistCard, createTrackCard } from './virtualScroll.js';
+import { dataPreloader } from './preloader.js';
+import { imageLoader } from './imageLoader.js';
 
 class UIController {
     constructor() {
@@ -166,6 +168,9 @@ class UIController {
     }
 
     setupEventListeners() {
+        // Hover intent detection for smart preloading
+        this.setupHoverIntentListeners();
+        
         // Navigation
         [...this.elements.navItems, ...this.elements.mobileNavItems].forEach(item => {
             item.addEventListener('click', (e) => {
@@ -403,11 +408,18 @@ class UIController {
 
     async loadInitialData() {
         try {
+            // Preload critical data first
+            await dataPreloader.preloadCriticalData();
+            
+            // Load UI with preloaded data
             await Promise.all([
                 this.loadHomeData(),
                 this.loadPlaylists(),
                 this.loadUserProfile()
             ]);
+            
+            // Prefetch likely next views in background
+            dataPreloader.prefetchLikelyTargets('home');
         } catch (error) {
             console.error('Error loading initial data:', error);
         }
@@ -423,13 +435,18 @@ class UIController {
 
     async loadHomeData() {
         try {
-            const [recently, popular] = await Promise.all([
-                api.getRecentlyPlayed(),
-                api.getPopularPlaylists()
-            ]);
+            // Try to get preloaded data first, fallback to API
+            const recently = dataPreloader.get('home-recent') || dataPreloader.get('recentlyPlayed') || await api.getRecentlyPlayed();
+            const popular = dataPreloader.get('home-popular') || await api.getPopularPlaylists();
 
             this.renderRecentlyPlayed(recently);
             this.renderPopularPlaylists(popular);
+            
+            // Preload album covers in background
+            const coverUrls = [...recently, ...popular]
+                .map(item => item.coverUrl)
+                .filter(Boolean);
+            imageLoader.preloadImages(coverUrls);
         } catch (error) {
             console.error('Error loading home data:', error);
         }
@@ -831,12 +848,18 @@ class UIController {
             this.elements.views[viewName].classList.remove('hidden');
             this.currentView = viewName;
 
-            // Load view data if needed
-            if (viewName === 'library') {
-                this.loadLibraryTab('playlists');
-            } else if (viewName === 'admin') {
-                this.loadAdminData();
-            }
+            // Preload view data before loading
+            dataPreloader.preloadView(viewName).then(() => {
+                // Load view data if needed
+                if (viewName === 'library') {
+                    this.loadLibraryTab('playlists');
+                } else if (viewName === 'admin') {
+                    this.loadAdminData();
+                }
+            });
+            
+            // Prefetch likely next views
+            dataPreloader.prefetchLikelyTargets(viewName);
         }
 
         // Update navigation
@@ -1296,6 +1319,61 @@ class UIController {
             info: 'fa-info-circle'
         };
         return icons[type] || icons.info;
+    }
+
+    /**
+     * Setup hover intent detection for intelligent preloading
+     */
+    setupHoverIntentListeners() {
+        let hoverTimeout = null;
+        const hoverDelay = 200; // ms to wait before triggering preload
+
+        // Listen for hover on cards
+        document.addEventListener('mouseover', (e) => {
+            const card = e.target.closest('.card');
+            if (!card) return;
+
+            clearTimeout(hoverTimeout);
+            hoverTimeout = setTimeout(() => {
+                // Intelligent preload based on hovered element
+                dataPreloader.intelligentPreload({
+                    currentView: this.currentView,
+                    hoveredElement: card
+                });
+
+                // Preload playlist details
+                const playlistId = card.dataset.playlistId;
+                if (playlistId) {
+                    dataPreloader.preloadPlaylist(playlistId);
+                }
+
+                // Preload artist details
+                const artistName = card.dataset.artistName;
+                if (artistName) {
+                    dataPreloader.preloadArtist(artistName);
+                }
+            }, hoverDelay);
+        });
+
+        // Clear timeout on mouseout
+        document.addEventListener('mouseout', (e) => {
+            const card = e.target.closest('.card');
+            if (card) {
+                clearTimeout(hoverTimeout);
+            }
+        });
+
+        // Preload on navigation hover
+        [...this.elements.navItems, ...this.elements.mobileNavItems].forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const view = item.dataset.view;
+                if (view && view !== this.currentView) {
+                    setTimeout(() => {
+                        dataPreloader.preloadView(view);
+                    }, 300);
+                }
+            });
+        });
     }
 }
 

@@ -2,9 +2,19 @@
  * JukeBx - Main Application Entry Point
  * A sleek, self-hosted music streaming alternative
  * Powered by LMF (lmf.logge.top)
+ * 
+ * Performance Features:
+ * - Blurhash placeholders for instant visual feedback
+ * - Intelligent data preloading with hover intent detection
+ * - Image lazy loading with IntersectionObserver
+ * - Resource hints for optimal loading
+ * - Virtual scrolling for large playlists
+ * - GPU-accelerated animations
  */
 
 import './ui.js';
+import { dataPreloader } from './preloader.js';
+import { imageLoader } from './imageLoader.js';
 
 // Application initialization
 console.log(`

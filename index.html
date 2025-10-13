@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="JukeBx - A sleek, self-hosted music streaming alternative powered by LMF">
-    <meta name="theme-color" content="#1db954">
+    <meta name="theme-color" content="#ff6b35">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="JukeBx">
     <title>JukeBx - Your Music, Your Way</title>
+    
+    <!-- Resource Hints for Performance -->
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -18,8 +22,11 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    
+    <!-- Blurhash Library -->
+    <script src="https://unpkg.com/blurhash@2.0.5/dist/blurhash.min.js" defer></script>
 </head>
 <body>
     <!-- Sidebar Navigation -->
