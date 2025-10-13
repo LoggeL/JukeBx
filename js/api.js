@@ -354,9 +354,47 @@ class APIService {
     }
 
     /**
-     * Search for tracks, playlists, artists
+     * Search for tracks, playlists, artists across all sources
      */
     async search(query) {
+        if (this.config.useMock) {
+            // Simulate searching multiple sources simultaneously
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const lowerQuery = query.toLowerCase();
+            
+            // Generate results for each source
+            const generateSourceResults = (source, count) => {
+                const adjectives = ['Blue', 'Golden', 'Midnight', 'Crimson', 'Electric', 'Cosmic', 'Velvet', 'Silver', 'Summer', 'Winter'];
+                const nouns = ['Dreams', 'Sunrise', 'Melody', 'Journey', 'Echo', 'Horizon', 'Paradise', 'Symphony', 'Vibes', 'Flow'];
+                
+                return Array.from({ length: count }, (_, i) => ({
+                    id: `${source}-search-${i + 1}`,
+                    title: `${lowerQuery} - ${adjectives[i % adjectives.length]} ${nouns[(i + 2) % nouns.length]}`,
+                    artist: `${source.charAt(0).toUpperCase() + source.slice(1)} Artist ${i + 1}`,
+                    album: `${source} Album`,
+                    duration: 180 + Math.floor(Math.random() * 180),
+                    source: source,
+                    downloadStatus: 'pending',
+                    liked: false,
+                    playCount: Math.floor(Math.random() * 10000),
+                    coverUrl: null
+                }));
+            };
+            
+            return {
+                youtube: generateSourceResults('youtube', 5),
+                soundcloud: generateSourceResults('soundcloud', 5),
+                deezer: generateSourceResults('deezer', 5),
+                // Also search local library
+                local: mockData.tracks.filter(t => 
+                    t.title.toLowerCase().includes(lowerQuery) ||
+                    t.artist.toLowerCase().includes(lowerQuery) ||
+                    t.album.toLowerCase().includes(lowerQuery)
+                ).slice(0, 5)
+            };
+        }
+        
         return this.request(this.config.endpoints.search, { 
             params: { q: query } 
         });
@@ -648,6 +686,55 @@ class APIService {
         return this.request(`${this.config.endpoints.artists}/${encodeURIComponent(artistName)}/follow`, {
             method: 'POST'
         });
+    }
+
+    /**
+     * Add track to library (on-demand download from external source)
+     */
+    async addTrackToLibrary(track) {
+        if (this.config.useMock) {
+            // Simulate download process
+            console.log(`Starting download for: ${track.title} from ${track.source}`);
+            
+            // Set status to downloading
+            track.downloadStatus = 'downloading';
+            
+            // Simulate download delay
+            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+            
+            // Mark as downloaded and add to local library
+            track.downloadStatus = 'downloaded';
+            track.source = 'local'; // Now it's in the local library
+            track.audioUrl = `https://example.com/audio/${track.id}.mp3`;
+            
+            // Add to mock tracks if not already there
+            const existingIndex = mockData.tracks.findIndex(t => t.id === track.id);
+            if (existingIndex === -1) {
+                mockData.tracks.push(track);
+            } else {
+                mockData.tracks[existingIndex] = track;
+            }
+            
+            return { success: true, track };
+        }
+
+        return this.request('/library/add', {
+            method: 'POST',
+            body: { trackId: track.id, source: track.source }
+        });
+    }
+
+    /**
+     * Get download queue status
+     */
+    async getDownloadQueue() {
+        if (this.config.useMock) {
+            const downloading = mockData.tracks.filter(t => t.downloadStatus === 'downloading');
+            const pending = mockData.tracks.filter(t => t.downloadStatus === 'pending');
+            return { downloading, pending };
+        }
+
+        return this.request('/library/download-queue');
     }
 }
 
