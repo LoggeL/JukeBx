@@ -884,7 +884,7 @@ body {
 @media (max-width: 768px) {
     :root {
         --sidebar-width: 0;
-        --player-height-mobile: 140px;
+        --player-height-mobile: 100px;
     }
     
     .sidebar {
@@ -924,6 +924,24 @@ body {
         grid-template-rows: auto auto;
         padding: var(--spacing-sm);
         height: var(--player-height-mobile);
+    }
+
+    /* Simplify player on mobile */
+    #shuffleBtn,
+    #repeatBtn,
+    #currentTime,
+    #totalTime,
+    #progressHandle,
+    #likeTrack {
+        display: none;
+    }
+
+    .player-controls .progress-bar-wrapper {
+        display: none;
+    }
+
+    .player-controls {
+        gap: var(--spacing-xs);
     }
     
     .player-track-info {
