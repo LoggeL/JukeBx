@@ -19,6 +19,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
 </head>
 <body>
     <!-- Sidebar Navigation -->
@@ -47,8 +48,8 @@
                 <span>Your Library</span>
             </a>
             <a href="#admin" class="nav-item" data-view="admin">
-                <i class="fas fa-cog"></i>
-                <span>Admin Panel</span>
+                <i class="fas fa-music"></i>
+                <span>All Music</span>
             </a>
         </nav>
         
@@ -86,8 +87,8 @@
         <div class="content-wrapper" id="contentWrapper">
             <!-- Home View -->
             <div class="view" id="homeView">
-                <h1>Welcome to JukeBx</h1>
-                <p class="subtitle">Your sleek, self-hosted music streaming experience</p>
+                <h1>JukeBx</h1>
+                <p class="subtitle">Your music collection</p>
                 
                 <section class="content-section">
                     <h2>Recently Played</h2>
@@ -97,15 +98,8 @@
                 </section>
                 
                 <section class="content-section">
-                    <h2>Popular Playlists</h2>
+                    <h2>Playlists</h2>
                     <div class="horizontal-scroll" id="popularPlaylists">
-                        <!-- Dynamically populated -->
-                    </div>
-                </section>
-                
-                <section class="content-section">
-                    <h2>Recommended for You</h2>
-                    <div class="horizontal-scroll" id="recommendedTracks">
                         <!-- Dynamically populated -->
                     </div>
                 </section>
@@ -114,10 +108,11 @@
             <!-- Search View -->
             <div class="view hidden" id="searchView">
                 <h1>Search</h1>
+                <p class="subtitle">Find music from YouTube, SoundCloud, Deezer, and your library</p>
                 <div class="search-results" id="searchResults">
                     <div class="empty-state">
                         <i class="fas fa-search"></i>
-                        <p>Search for your favorite music</p>
+                        <p>Start typing to search across all sources</p>
                     </div>
                 </div>
             </div>
@@ -138,15 +133,15 @@
 
             <!-- Admin Panel View -->
             <div class="view hidden" id="adminView">
-                <h1>Admin Panel</h1>
-                <p class="subtitle">Manage your music collection</p>
+                <h1>Library</h1>
+                <p class="subtitle">All your music</p>
                 
                 <div class="admin-stats">
                     <div class="stat-card">
                         <i class="fas fa-music"></i>
                         <div class="stat-info">
                             <h3 id="totalTracks">0</h3>
-                            <p>Total Tracks</p>
+                            <p>Tracks</p>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -156,43 +151,11 @@
                             <p>Playlists</p>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-user"></i>
-                        <div class="stat-info">
-                            <h3 id="totalArtists">0</h3>
-                            <p>Artists</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-compact-disc"></i>
-                        <div class="stat-info">
-                            <h3 id="totalAlbums">0</h3>
-                            <p>Albums</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="admin-actions">
-                    <button class="btn-primary" id="scanLibrary">
-                        <i class="fas fa-sync"></i>
-                        Scan Library
-                    </button>
-                    <button class="btn-primary" id="uploadMusic">
-                        <i class="fas fa-upload"></i>
-                        Upload Music
-                    </button>
                 </div>
                 
                 <div class="admin-table">
-                    <h2>All Tracks</h2>
                     <div class="table-controls">
                         <input type="text" placeholder="Filter tracks..." id="adminSearch">
-                        <select id="sortBy">
-                            <option value="title">Title</option>
-                            <option value="artist">Artist</option>
-                            <option value="album">Album</option>
-                            <option value="duration">Duration</option>
-                        </select>
                     </div>
                     <div class="tracks-table" id="adminTracksTable">
                         <!-- Dynamically populated with virtual scrolling -->
@@ -419,8 +382,8 @@
             <span>Library</span>
         </a>
         <a href="#admin" class="mobile-nav-item" data-view="admin">
-            <i class="fas fa-cog"></i>
-            <span>Admin</span>
+            <i class="fas fa-music"></i>
+            <span>Music</span>
         </a>
     </nav>
 

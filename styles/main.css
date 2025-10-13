@@ -1,16 +1,18 @@
 /* JukeBx - Modern Music Streaming UI */
 :root {
-    /* Color Palette */
-    --primary: #1db954;
-    --primary-hover: #1ed760;
-    --background: #121212;
-    --background-elevated: #181818;
-    --background-base: #000000;
+    /* JukeBx Color Palette - Retro Jukebox Inspired */
+    --primary: #ff6b35;
+    --primary-hover: #ff8555;
+    --secondary: #f7931e;
+    --accent: #ffd23f;
+    --background: #0a0a0f;
+    --background-elevated: #16161d;
+    --background-base: #050508;
     --text-primary: #ffffff;
-    --text-secondary: #b3b3b3;
-    --text-subdued: #6a6a6a;
-    --border: #282828;
-    --highlight: #ffffff1a;
+    --text-secondary: #b8b8c0;
+    --text-subdued: #6a6a74;
+    --border: #24242e;
+    --highlight: #ffffff15;
     
     /* Spacing */
     --spacing-xs: 4px;
@@ -89,7 +91,10 @@ body {
     gap: var(--spacing-sm);
     font-size: 24px;
     font-weight: 700;
-    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .logo i {
@@ -1508,7 +1513,7 @@ input:checked + .slider:before {
     align-items: flex-end;
     gap: var(--spacing-lg);
     padding: var(--spacing-xl);
-    background: linear-gradient(180deg, rgba(29, 185, 84, 0.3) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255, 107, 53, 0.2) 0%, transparent 100%);
     margin-bottom: var(--spacing-lg);
 }
 
@@ -1832,4 +1837,154 @@ input:checked + .slider:before {
     .bar-value {
         font-size: 9px;
     }
+}
+
+/* Source Badges */
+.source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+}
+
+.source-badge.youtube {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff0000;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.source-badge.soundcloud {
+    background: rgba(255, 85, 0, 0.2);
+    color: #ff5500;
+    border: 1px solid rgba(255, 85, 0, 0.3);
+}
+
+.source-badge.deezer {
+    background: rgba(0, 196, 255, 0.2);
+    color: #00c4ff;
+    border: 1px solid rgba(0, 196, 255, 0.3);
+}
+
+.source-badge.local {
+    background: rgba(255, 210, 63, 0.2);
+    color: var(--accent);
+    border: 1px solid rgba(255, 210, 63, 0.3);
+}
+
+/* Download Status */
+.download-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.download-status.pending {
+    background: rgba(255, 165, 0, 0.15);
+    color: #ffa500;
+    border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+.download-status.downloading {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.download-status.downloaded {
+    background: rgba(255, 107, 53, 0.15);
+    color: var(--primary);
+    border: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+.download-status i {
+    font-size: 10px;
+}
+
+.download-status.downloading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Simplified track actions */
+.track-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.track-action-btn:hover {
+    color: var(--primary);
+    background: var(--highlight);
+}
+
+.track-action-btn.add-btn {
+    color: var(--accent);
+}
+
+.track-action-btn.add-btn:hover {
+    color: var(--primary);
+    background: rgba(255, 107, 53, 0.1);
+}
+
+/* Simplified search results */
+.search-source-section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--background-elevated);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.search-source-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.search-source-section.youtube h3 {
+    color: #ff0000;
+}
+
+.search-source-section.soundcloud h3 {
+    color: #ff5500;
+}
+
+.search-source-section.deezer h3 {
+    color: #00c4ff;
+}
+
+/* Minimalistic adjustments */
+.view h1 {
+    font-size: 36px;
+    margin-bottom: var(--spacing-md);
+    font-weight: 700;
+}
+
+.content-section h2 {
+    font-size: 20px;
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
 }

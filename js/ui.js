@@ -76,7 +76,6 @@ class UIController {
         // Home
         this.elements.recentlyPlayed = document.getElementById('recentlyPlayed');
         this.elements.popularPlaylists = document.getElementById('popularPlaylists');
-        this.elements.recommendedTracks = document.getElementById('recommendedTracks');
 
         // Library
         this.elements.libraryContent = document.getElementById('libraryContent');
@@ -86,13 +85,8 @@ class UIController {
         this.elements.admin = {
             totalTracks: document.getElementById('totalTracks'),
             totalPlaylists: document.getElementById('totalPlaylists'),
-            totalArtists: document.getElementById('totalArtists'),
-            totalAlbums: document.getElementById('totalAlbums'),
-            scanLibrary: document.getElementById('scanLibrary'),
-            uploadMusic: document.getElementById('uploadMusic'),
             adminTracksTable: document.getElementById('adminTracksTable'),
-            adminSearch: document.getElementById('adminSearch'),
-            sortBy: document.getElementById('sortBy')
+            adminSearch: document.getElementById('adminSearch')
         };
 
         // Playlists
@@ -272,28 +266,6 @@ class UIController {
             });
         });
 
-        // Admin actions
-        this.elements.admin.scanLibrary?.addEventListener('click', async () => {
-            const btn = this.elements.admin.scanLibrary;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Scanning...';
-            
-            try {
-                const result = await api.scanLibrary();
-                alert(`Scan complete! Found ${result.tracksFound} new tracks.`);
-                await this.loadAdminData();
-            } catch (error) {
-                alert('Scan failed: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sync"></i> Scan Library';
-            }
-        });
-
-        this.elements.admin.uploadMusic?.addEventListener('click', () => {
-            alert('Upload functionality would open a file picker here.\nIn production, this would connect to the LMF backend.');
-        });
-
         // Create playlist
         this.elements.createPlaylist?.addEventListener('click', async () => {
             const name = prompt('Enter playlist name:');
@@ -451,15 +423,13 @@ class UIController {
 
     async loadHomeData() {
         try {
-            const [recently, popular, recommended] = await Promise.all([
+            const [recently, popular] = await Promise.all([
                 api.getRecentlyPlayed(),
-                api.getPopularPlaylists(),
-                api.getRecommendedTracks()
+                api.getPopularPlaylists()
             ]);
 
             this.renderRecentlyPlayed(recently);
             this.renderPopularPlaylists(popular);
-            this.renderRecommendedTracks(recommended);
         } catch (error) {
             console.error('Error loading home data:', error);
         }
@@ -484,17 +454,6 @@ class UIController {
                 this.showPlaylist(playlist.id);
             });
             this.elements.popularPlaylists.appendChild(card);
-        });
-    }
-
-    renderRecommendedTracks(tracks) {
-        this.elements.recommendedTracks.innerHTML = '';
-        tracks.forEach(track => {
-            const card = createTrackCard(track);
-            card.addEventListener('click', () => {
-                player.setQueue([track], 0);
-            });
-            this.elements.recommendedTracks.appendChild(card);
         });
     }
 
@@ -693,49 +652,136 @@ class UIController {
     renderSearchResults(results) {
         this.elements.searchResults.innerHTML = '';
 
-        if (results.tracks.length > 0) {
-            const section = document.createElement('section');
-            section.className = 'content-section';
-            section.innerHTML = '<h2>Songs</h2>';
+        // Check if we have multi-source results (new format)
+        if (results.youtube || results.soundcloud || results.deezer || results.local) {
+            // Render results by source
+            const sources = [
+                { key: 'local', name: 'Your Library', icon: 'fas fa-music' },
+                { key: 'youtube', name: 'YouTube', icon: 'fab fa-youtube' },
+                { key: 'soundcloud', name: 'SoundCloud', icon: 'fab fa-soundcloud' },
+                { key: 'deezer', name: 'Deezer', icon: 'fab fa-deezer' }
+            ];
+
+            let hasResults = false;
+
+            sources.forEach(({ key, name, icon }) => {
+                if (results[key] && results[key].length > 0) {
+                    hasResults = true;
+                    const section = document.createElement('div');
+                    section.className = `search-source-section ${key}`;
+                    
+                    const header = document.createElement('h3');
+                    header.innerHTML = `<i class="${icon}"></i> ${name}`;
+                    section.appendChild(header);
+                    
+                    const grid = document.createElement('div');
+                    grid.className = 'horizontal-scroll';
+                    
+                    results[key].forEach(track => {
+                        const card = createTrackCard(track);
+                        card.addEventListener('click', () => {
+                            if (track.source === 'local' || track.downloadStatus === 'downloaded') {
+                                player.setQueue([track], 0);
+                            } else {
+                                // Show add to library option
+                                this.showAddTrackPrompt(track);
+                            }
+                        });
+                        grid.appendChild(card);
+                    });
+                    
+                    section.appendChild(grid);
+                    this.elements.searchResults.appendChild(section);
+                }
+            });
+
+            if (!hasResults) {
+                this.elements.searchResults.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No results found across any source</p>
+                    </div>
+                `;
+            }
+        } else {
+            // Old format support (backward compatible)
+            if (results.tracks && results.tracks.length > 0) {
+                const section = document.createElement('section');
+                section.className = 'content-section';
+                section.innerHTML = '<h2>Songs</h2>';
+                
+                const grid = document.createElement('div');
+                grid.className = 'horizontal-scroll';
+                
+                results.tracks.slice(0, 10).forEach(track => {
+                    const card = createTrackCard(track);
+                    card.addEventListener('click', () => player.setQueue([track], 0));
+                    grid.appendChild(card);
+                });
+                
+                section.appendChild(grid);
+                this.elements.searchResults.appendChild(section);
+            }
+
+            if (!results.tracks || results.tracks.length === 0) {
+                this.elements.searchResults.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No results found</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    /**
+     * Show prompt to add track to library
+     */
+    showAddTrackPrompt(track) {
+        const message = `"${track.title}" is not in your library. Would you like to add it?`;
+        if (confirm(message)) {
+            this.addTrackToLibrary(track);
+        }
+    }
+
+    /**
+     * Add track to library (download on-demand)
+     */
+    async addTrackToLibrary(track) {
+        try {
+            this.showNotification(`Adding "${track.title}" to your library...`, 'info');
             
-            const grid = document.createElement('div');
-            grid.className = 'horizontal-scroll';
-            
-            results.tracks.slice(0, 10).forEach(track => {
-                const card = createTrackCard(track);
-                card.addEventListener('click', () => player.setQueue([track], 0));
-                grid.appendChild(card);
+            // Update UI to show downloading status
+            const trackElements = document.querySelectorAll(`[data-track-id="${track.id}"]`);
+            trackElements.forEach(el => {
+                const statusBadge = el.querySelector('.download-status');
+                if (statusBadge) {
+                    statusBadge.className = 'download-status downloading';
+                    statusBadge.innerHTML = '<i class="fas fa-spinner"></i> Downloading';
+                }
             });
             
-            section.appendChild(grid);
-            this.elements.searchResults.appendChild(section);
-        }
-
-        if (results.playlists.length > 0) {
-            const section = document.createElement('section');
-            section.className = 'content-section';
-            section.innerHTML = '<h2>Playlists</h2>';
+            const result = await api.addTrackToLibrary(track);
             
-            const grid = document.createElement('div');
-            grid.className = 'horizontal-scroll';
-            
-            results.playlists.slice(0, 10).forEach(playlist => {
-                const card = createPlaylistCard(playlist);
-                card.addEventListener('click', () => this.showPlaylist(playlist.id));
-                grid.appendChild(card);
-            });
-            
-            section.appendChild(grid);
-            this.elements.searchResults.appendChild(section);
-        }
-
-        if (results.tracks.length === 0 && results.playlists.length === 0) {
-            this.elements.searchResults.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-search"></i>
-                    <p>No results found</p>
-                </div>
-            `;
+            if (result.success) {
+                this.showNotification(`"${track.title}" added to your library!`, 'success');
+                
+                // Update UI to show downloaded status
+                trackElements.forEach(el => {
+                    const statusBadge = el.querySelector('.download-status');
+                    if (statusBadge) {
+                        statusBadge.remove();
+                    }
+                    const sourceBadge = el.querySelector('.source-badge');
+                    if (sourceBadge) {
+                        sourceBadge.className = 'source-badge local';
+                        sourceBadge.textContent = 'local';
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error adding track to library:', error);
+            this.showNotification('Failed to add track to library', 'error');
         }
     }
 
@@ -748,8 +794,6 @@ class UIController {
 
             this.elements.admin.totalTracks.textContent = stats.totalTracks;
             this.elements.admin.totalPlaylists.textContent = stats.totalPlaylists;
-            this.elements.admin.totalArtists.textContent = stats.totalArtists;
-            this.elements.admin.totalAlbums.textContent = stats.totalAlbums;
 
             this.renderAdminTracksTable(tracks);
         } catch (error) {

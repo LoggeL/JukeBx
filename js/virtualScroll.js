@@ -143,6 +143,27 @@ export function createTrackRow(track, index, options = {}) {
     const titleDiv = document.createElement('div');
     titleDiv.className = 'track-name';
     titleDiv.textContent = track.title;
+    
+    // Add source badge
+    if (track.source) {
+        const sourceBadge = document.createElement('span');
+        sourceBadge.className = `source-badge ${track.source}`;
+        sourceBadge.textContent = track.source === 'local' ? 'local' : track.source;
+        titleDiv.appendChild(sourceBadge);
+    }
+    
+    // Add download status badge if applicable
+    if (track.downloadStatus && track.downloadStatus !== 'downloaded') {
+        const statusBadge = document.createElement('span');
+        statusBadge.className = `download-status ${track.downloadStatus}`;
+        if (track.downloadStatus === 'downloading') {
+            statusBadge.innerHTML = '<i class="fas fa-spinner"></i> Downloading';
+        } else if (track.downloadStatus === 'pending') {
+            statusBadge.innerHTML = '<i class="fas fa-clock"></i> Pending';
+        }
+        titleDiv.appendChild(statusBadge);
+    }
+    
     infoCell.appendChild(titleDiv);
     
     const artistDiv = document.createElement('div');
@@ -170,26 +191,25 @@ export function createTrackRow(track, index, options = {}) {
     const actionsCell = document.createElement('div');
     actionsCell.className = 'track-actions';
     
-    // Download button
-    const downloadBtn = document.createElement('button');
-    downloadBtn.className = 'btn-icon';
-    downloadBtn.title = 'Download track';
-    downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
-    downloadBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (onDownload) {
-            onDownload(track);
-        } else {
-            // Import ui dynamically to avoid circular dependency
+    // If track is not downloaded (from external source), show add button
+    if (track.source && track.source !== 'local' && track.downloadStatus !== 'downloaded') {
+        const addBtn = document.createElement('button');
+        addBtn.className = 'track-action-btn add-btn';
+        addBtn.title = 'Add to library (download on-demand)';
+        addBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+        addBtn.onclick = (e) => {
+            e.stopPropagation();
+            // Trigger download
             import('./ui.js').then(module => {
-                module.ui.downloadTrack(track.id);
+                module.ui.addTrackToLibrary(track);
             });
-        }
-    };
-    actionsCell.appendChild(downloadBtn);
+        };
+        actionsCell.appendChild(addBtn);
+    }
     
+    // More menu button
     const moreBtn = document.createElement('button');
-    moreBtn.className = 'btn-icon';
+    moreBtn.className = 'track-action-btn';
     moreBtn.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
     moreBtn.onclick = (e) => {
         e.stopPropagation();
@@ -285,6 +305,15 @@ export function createTrackCard(track) {
     const title = document.createElement('div');
     title.className = 'card-title';
     title.textContent = track.title;
+    
+    // Add source badge
+    if (track.source) {
+        const sourceBadge = document.createElement('span');
+        sourceBadge.className = `source-badge ${track.source}`;
+        sourceBadge.textContent = track.source === 'local' ? '♪' : track.source;
+        title.appendChild(sourceBadge);
+    }
+    
     card.appendChild(title);
     
     const subtitle = document.createElement('div');
